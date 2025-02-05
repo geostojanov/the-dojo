@@ -3,6 +3,8 @@ import Select from 'react-select'
 import { useCollection } from '../../hooks/useCollection'
 import { timestamp } from '../../firebase/config'
 import { useAuthContext } from '../../hooks/useAuthContext'
+import { useFirestore } from '../../hooks/useFirestore'
+import { useHistory } from 'react-router-dom'
 
 // styles
 import './Create.css'
@@ -15,6 +17,9 @@ const categories = [
 ]
 
 export default function Create() {
+  const history = useHistory()
+  const { addDocument, response } = useFirestore('projects')
+  
   const { documents } = useCollection('users')
   const [users, setUsers ] = useState([])
   const { user } = useAuthContext()
@@ -38,7 +43,6 @@ export default function Create() {
   
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
     setFormError(null)
     
     if(!category) {
@@ -73,7 +77,11 @@ export default function Create() {
       createdBy,
       assignedUsersList
     }
-    console.log(project)
+    
+    await addDocument(project)
+    if(!response.error) {
+      history.push('/')
+    }
   }
   
   return (
